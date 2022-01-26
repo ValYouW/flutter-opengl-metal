@@ -22,6 +22,7 @@ class GaussianBlur(private val outSurface: Surface, private val srcImg: Bitmap) 
 
 	private var srcTexture: Int
 
+	// Credit: https://xorshaders.weebly.com/tutorials/blur-shaders-5-part-2
 	private val fragmentShader = """#version 300 es
 		precision highp float;
 
@@ -46,10 +47,10 @@ class GaussianBlur(private val outSurface: Surface, private val srcImg: Bitmap) 
 				}
 			}
 
-			acc /= Quality * Directions - 15.0;
+			acc /= Quality * Directions;
+
 			outColor =  acc;
 		}
-
 	"""
 
 	init {
@@ -59,7 +60,7 @@ class GaussianBlur(private val outSurface: Surface, private val srcImg: Bitmap) 
 		programSetup()
 
 		// Create the texture that will hold the source image
-		srcTexture = GLUtils.createTexture(null, srcImg.width, srcImg.height)
+		srcTexture = GLUtils.createTexture(srcImg, srcImg.width, srcImg.height)
 	}
 
 	private fun eglSetup() {
@@ -170,7 +171,7 @@ class GaussianBlur(private val outSurface: Surface, private val srcImg: Bitmap) 
 		GLES30.glUseProgram(this.program)
 
 		// set u_radius in fragment shader
-		GLES30.glUniform1f(this.uniforms["radius"]!!, radius)
+		GLES30.glUniform1f(this.uniforms["u_radius"]!!, radius)
 
 		GLES30.glUniform1f(this.uniforms["u_flipY"]!!, if (flip) -1f else 1f) // need to y flip for canvas
 

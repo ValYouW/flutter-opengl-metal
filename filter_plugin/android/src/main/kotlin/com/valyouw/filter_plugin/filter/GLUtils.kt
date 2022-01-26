@@ -53,7 +53,7 @@ object GLUtils {
 		return program
 	}
 
-	fun createTexture(data: Bitmap?, width: Int, height: Int, internalFormat: Int = GLES30.GL_RGBA16F, format: Int = GLES30.GL_RGBA, type: Int = GLES30.GL_UNSIGNED_BYTE): Int {
+	fun createTexture(data: Bitmap?, width: Int, height: Int, internalFormat: Int = GLES30.GL_RGBA, format: Int = GLES30.GL_RGBA, type: Int = GLES30.GL_UNSIGNED_BYTE): Int {
 		val texture = IntArray(1)
 		GLES30.glGenTextures(1, texture, 0)
 		GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, texture[0])

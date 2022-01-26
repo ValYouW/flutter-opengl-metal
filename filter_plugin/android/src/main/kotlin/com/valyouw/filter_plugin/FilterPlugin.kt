@@ -52,7 +52,7 @@ class FilterPlugin: FlutterPlugin, MethodCallHandler {
           // Get the radius param
           val radius: Double = call.argument("radius")!!
 
-          gaussianBlur!!.draw(radius.toFloat())
+          gaussianBlur!!.draw(radius.toFloat(), true)
           result.success(null)
         } else {
           result.error("NOT_INITIALIZED", "Filter not initialized", null)

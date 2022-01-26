@@ -29,7 +29,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  filter_plugin:
+    path: ../filter_plugin
 
 dev_dependencies:
   flutter_test:

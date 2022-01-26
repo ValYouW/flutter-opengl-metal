@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:ui';
+import 'package:filter_plugin/filter_preview.dart';
 import 'package:flutter/material.dart';
+import 'package:filter_plugin/filter_controller.dart';
 
 class FilterPage extends StatefulWidget {
   const FilterPage({Key? key}) : super(key: key);
@@ -11,14 +13,19 @@ class FilterPage extends StatefulWidget {
 
 class _FilterPageState extends State<FilterPage> {
   double _radius = 0;
-
-  final Completer<dynamic> _filterLoader = Completer<dynamic>();
+  FilterController? _controller;
 
   @override
   void initState() {
     super.initState();
 
     init();
+  }
+
+  @override
+  dispose() async {
+    super.dispose();
+    await _controller?.dispose();
   }
 
   init() async {
@@ -38,32 +45,46 @@ class _FilterPageState extends State<FilterPage> {
     // wait for the image to be loaded
     final imageInfo = await completer.future;
 
-    // Convert the image bytes to raw rgba
-    final rgba = await imageInfo.image.toByteData(format: ImageByteFormat.rawRgba);
+    // create the filter controller
+    await initFilterController(imageInfo);
 
     // This is important to release memory within the image stream
     stream.removeListener(listener);
   }
 
+  initFilterController(ImageInfo imageInfo) async {
+    // Convert the image bytes to raw rgba
+    final rgba = await imageInfo.image.toByteData(format: ImageByteFormat.rawRgba);
+
+    // Initialize the filter controller
+    _controller = FilterController();
+    await _controller!.initialize(rgba!, imageInfo.image.width, imageInfo.image.height);
+
+    await _controller!.draw(_radius);
+
+    // update ui
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_controller == null) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
     return Material(
       child: Container(
         color: Colors.white,
         child: Column(
           children: [
             Expanded(
-              child: FutureBuilder(
-                future: _filterLoader.future,
-                builder: (context, snapshot) {
-                  return snapshot.hasData
-                      ? Container(
-                          color: Colors.green,
-                        )
-                      : const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                },
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  FilterPreview(_controller!),
+                ],
               ),
             ),
             Row(
@@ -81,6 +102,7 @@ class _FilterPageState extends State<FilterPage> {
                     onChanged: (val) {
                       setState(() {
                         _radius = val;
+                        _controller!.draw(_radius);
                       });
                     },
                   ),
